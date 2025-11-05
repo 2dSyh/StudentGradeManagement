@@ -10,7 +10,7 @@ import java.sql.Date;
 public class StudentDAO implements DAO<Student>{
     @Override
     public boolean insert(Student s){
-        String sql = "INSERT INTO Student(student_id, full_name, date_of_birth, gender, address, class_id) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Students(student_id, full_name, date_of_birth, gender, address, class_id) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, s.getStudentId());
             pstmt.setString(2, s.getFullName());
@@ -26,7 +26,7 @@ public class StudentDAO implements DAO<Student>{
     }
     @Override
     public boolean update(Student s){
-        String sql = "UPDATE Student SET full_name = ?, date_of_birth = ?, gender = ?, address = ?, class_id = ? WHERE student_id = ?";
+        String sql = "UPDATE Students SET full_name = ?, date_of_birth = ?, gender = ?, address = ?, class_id = ? WHERE student_id = ?";
         try (Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(6, s.getStudentId());
             pstmt.setString(1, s.getFullName());
@@ -42,7 +42,7 @@ public class StudentDAO implements DAO<Student>{
     }
     @Override
     public boolean delete(int id){
-        String sql = "DELETE FROM Student WHERE student_id = ?";
+        String sql = "DELETE FROM Students WHERE student_id = ?";
         try(Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
@@ -53,7 +53,7 @@ public class StudentDAO implements DAO<Student>{
     }
     @Override
     public Student getById(int id){
-        String sql = "SELECT * FROM Student WHERE student_id = ?";
+        String sql = "SELECT * FROM Students WHERE student_id = ?";
         try(Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -68,7 +68,7 @@ public class StudentDAO implements DAO<Student>{
     @Override
     public List<Student> getAll(){
         List<Student> list = new ArrayList<>();
-        String sql = "SELECT * FROM Student";
+        String sql = "SELECT * FROM Students";
         try(Connection conn = DatabaseConnector.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
             while(rs.next()){
                 list.add(new Student(rs.getInt("student_id"),rs.getString("full_name"),rs.getDate("date_of_birth").toLocalDate(),rs.getString("gender"),rs.getString("address"),rs.getInt("class_id")));
