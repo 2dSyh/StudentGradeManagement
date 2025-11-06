@@ -1,18 +1,20 @@
 package dao;
 
 
+
+
 import model.Teacher;
 import util.DatabaseConnector;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class TeacherDAO implements DAO<Teacher> {
     
 
     @Override
     public boolean insert(Teacher t){
+
         String sql = "INSERT INTO Teachers(user_id, username, password, full_name, role) VALUES (?,?,?,?,?)";
 
         try(Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -28,6 +30,7 @@ public class TeacherDAO implements DAO<Teacher> {
             return false;
         }
     }
+
 
 
     public boolean update(Teacher t){
