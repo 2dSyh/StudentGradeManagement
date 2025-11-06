@@ -1,23 +1,23 @@
 package dao;
 
-import model.Students;
+import model.Student;
 import util.DatabaseConnector;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.Date;
 
-public class StudentDAO implements DAO<Students>{
+public class StudentDAO implements DAO<Student>{
     @Override
-    public boolean insert(Students s){
-        String sql = "INSERT INTO Students(student_id, full_name, date_of_birth, gender, address, class_id) VALUES (?, ?, ?, ?, ?, ?)";
+    public boolean insert(Student s){
+        String sql = "INSERT INTO Student(student_id, full_name, date_of_birth, gender, address, class_id) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, s.getStudentId());
             pstmt.setString(2, s.getFullName());
             pstmt.setDate(3, Date.valueOf(s.getDateOfBirth()));
             pstmt.setString(4, s.getGender());
             pstmt.setString(5, s.getAddress());
-            pstmt.setInt(6, s.getClassroom().getClassId());
+            pstmt.setInt(6, s.getClassroom());
             return pstmt.executeUpdate() > 0;
         }catch(SQLException e){
             System.out.println("Loi khi cap nhat hoc sinh: " + e.getMessage());
@@ -25,15 +25,15 @@ public class StudentDAO implements DAO<Students>{
         }
     }
     @Override
-    public boolean update(Students s){
-        String sql = "UPDATE Students SET full_name = ?, date_of_birth = ?, gender = ?, address = ?, class_id = ? WHERE student_id = ?";
+    public boolean update(Student s){
+        String sql = "UPDATE Student SET full_name = ?, date_of_birth = ?, gender = ?, address = ?, class_id = ? WHERE student_id = ?";
         try (Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(6, s.getStudentId());
             pstmt.setString(1, s.getFullName());
             pstmt.setDate(2, Date.valueOf(s.getDateOfBirth()));
             pstmt.setString(3, s.getGender());
             pstmt.setString(4, s.getAddress());
-            pstmt.setInt(5, s.getClassroom().getClassId());
+            pstmt.setInt(5, s.getClassroom());
             return pstmt.executeUpdate() > 0;
         }catch(SQLException e){
             System.out.println("loi khi sua hoc sinh: " + e.getMessage());
@@ -42,7 +42,7 @@ public class StudentDAO implements DAO<Students>{
     }
     @Override
     public boolean delete(int id){
-        String sql = "DELETE FROM Students WHERE Student_id = ?";
+        String sql = "DELETE FROM Student WHERE Student_id = ?";
         try(Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
@@ -52,13 +52,13 @@ public class StudentDAO implements DAO<Students>{
         }
     }
     @Override
-    public Students getById(int id){
-        String sql = "SELECT * FROM Students WHERE Student_id = ?";
+    public Student getById(int id){
+        String sql = "SELECT * FROM Student WHERE Student_id = ?";
         try(Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
             if(rs.next()){
-                return new Students(rs.getInt("student_id"), rs.getString("full_name"), rs.getDate("date_of_birth").toLocalDate(), rs.getString("gender"), rs.getString("address"), null);
+                return new Student(rs.getInt("student_id"), rs.getString("full_name"), rs.getDate("date_of_birth").toLocalDate(), rs.getString("gender"), rs.getString("address"), rs.getInt("class_id"));
             }
         }catch(SQLException e){
             System.out.println("loi khi tim kiem: " + e.getMessage());
@@ -66,12 +66,12 @@ public class StudentDAO implements DAO<Students>{
         return null;
     }
     @Override
-    public List<Students> getAll(){
-        List<Students> list = new ArrayList<>();
-        String sql = "SELECT * FROM Students";
+    public List<Student> getAll(){
+        List<Student> list = new ArrayList<>();
+        String sql = "SELECT * FROM Student";
         try(Connection conn = DatabaseConnector.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
             while(rs.next()){
-                list.add(new Students(rs.getInt("student_id"),rs.getString("full_name"),rs.getDate("date_of_birth").toLocalDate(),rs.getString("gender"),rs.getString("address"),null));
+                list.add(new Student(rs.getInt("student_id"),rs.getString("full_name"),rs.getDate("date_of_birth").toLocalDate(),rs.getString("gender"),rs.getString("address"),rs.getInt("class_id")));
             }
             return list;
         }catch(SQLException e){
