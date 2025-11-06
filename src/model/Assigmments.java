@@ -2,37 +2,37 @@ package model;
 
 public class Assigmments{
     private int assigmmentId;
-    private Users teacher;
-    private Classes classroom;
-    private Subjects subject;
+    private int teacherId;
+    private int classId;
+    private int subjectId;
 
     public Assigmments(){}
 
-    public Assigmments(int assigmmentId, Users teacher, Classes classroom, Subjects subject){
+    public Assigmments(int assigmmentId, int teacherId, int classId, int subjectId){
         this.assigmmentId = assigmmentId;
-        this.teacher = teacher;
-        this.classroom = classroom;
-        this.subject = subject;
+        this.teacherId = teacherId;
+        this.classId = classId;
+        this.subjectId = subjectId;
     }
 
     public void setAssigmmentId(int assigmmentId){ this.assigmmentId = assigmmentId;}
     public int getAssigmmentId(){ return assigmmentId;}
 
-    public void setTeacher(Users teacher){ this.teacher = teacher;}
-    public Users getTeacher(){ return teacher;}
+    public void setTeacherId(int teacherId){ this.teacherId = teacherId;}
+    public int getTeacherId(){ return teacherId;}
 
-    public void setClassroom(Classes classroom){ this.classroom = classroom;}
-    public Classes getClassroom(){ return classroom;}
+    public void setClassId(int classId){ this.classId = classId;}
+    public int getClassId(){ return classId;}
 
-    public void setSubject(Subjects subject){ this.subject = subject;}
-    public Subjects getSubject(){ return subject;}
+    public void setSubjectId(int subjectId){ this.subjectId = subjectId;}
+    public int getSubjectId(){ return subjectId;}
 
     @Override
     public String toString(){
         return "Assigmment{ID: " + assigmmentId +
-        ", Teacher: " + (teacher!=null?teacher.getFullName():"N/A") +
-        ", Class: " + (classroom!=null?classroom.getClassName():"N/A") +
-        ", Subject: " + (subject!=null?subject.getSubjectName():"N/A") +
+        ", TeacherId: " + teacherId +
+        ", Class: " + classId +
+        ", SubjectId: " + subjectId +
         "}";
     }
 }
