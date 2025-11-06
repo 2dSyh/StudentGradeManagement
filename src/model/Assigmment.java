@@ -1,14 +1,14 @@
 package model;
 
-public class Assigmments{
+public class Assigmment{
     private int assigmmentId;
     private int teacherId;
     private int classId;
     private int subjectId;
 
-    public Assigmments(){}
+    public Assigmment(){}
 
-    public Assigmments(int assigmmentId, int teacherId, int classId, int subjectId){
+    public Assigmment(int assigmmentId, int teacherId, int classId, int subjectId){
         this.assigmmentId = assigmmentId;
         this.teacherId = teacherId;
         this.classId = classId;
