@@ -1,0 +1,9 @@
+# Ensure Java source files are treated as text and use LF on checkout
+*.java text eol=lf
+*.xml text eol=lf
+*.properties text eol=lf
+*.md text eol=lf
+
+# Optional: declare text for common files
+*.gradle text eol=lf
+*.yml text eol=lf
