@@ -1,7 +1,7 @@
-package dao;
+package grademanager.dao;
 
-import model.Student;
-import util.DatabaseConnector;
+import grademanager.model.Student;
+import grademanager.util.DatabaseConnector;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

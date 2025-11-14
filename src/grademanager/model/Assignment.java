@@ -1,4 +1,4 @@
-package model;
+package grademanager.model;
 
 public class Assignment{
     private int assignmentId;
