@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="745.0" prefWidth="1081.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.grademanager.controller.StudentManagementController">
+   <center>
+      <TableView fx:id="studentTableView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <columns>
+          <TableColumn fx:id="idColumn" prefWidth="50.0" text="ID" />
+          <TableColumn fx:id="nameColumn" prefWidth="200.0" text="Họ và Tên" />
+            <TableColumn fx:id="dobColumn" prefWidth="120.0" text="Ngày sinh" />
+            <TableColumn fx:id="genderColumn" text="Giới tính" />
+            <TableColumn fx:id="addressColumn" prefWidth="250.0" text="Địa chỉ" />
+            <TableColumn fx:id="classColumn" text="Lớp" />
+        </columns>
+      </TableView>
+   </center>
+   <right>
+      <VBox prefHeight="200.0" prefWidth="300.0" spacing="10.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+         </padding>
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Thông tin Sinh viên">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Text>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Họ và Tên:" />
+            <TextField fx:id="nameField" promptText="Nhập họ và tên" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Ngày sinh:" />
+            <DatePicker fx:id="dobPicker" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Giới tính:" />
+            <ComboBox fx:id="genderComboBox" prefWidth="150.0" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Địa chỉ:" />
+            <TextField fx:id="addressField" promptText="Nhập địa chỉ" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Lớp:" />
+            <ComboBox fx:id="classComboBox" prefWidth="150.0" />
+            <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+               <children>
+                  <Button fx:id="addButton" mnemonicParsing="false" onAction="#handleAddButton" style="-fx-background-color: #385170;" text="Thêm" />
+                  <Button fx:id="updateButton" mnemonicParsing="false" onAction="#handleUpdateButton" style="-fx-background-color: #385170;" text="Lưu" />
+                  <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#handleDeleteButton" style="-fx-background-color: #385170;" text="Xóa" />
+                  <Button fx:id="clearButton" mnemonicParsing="false" onAction="#handleClearButton" style="-fx-background-color: #385170;" text="Làm mới" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </right>
+</BorderPane>
