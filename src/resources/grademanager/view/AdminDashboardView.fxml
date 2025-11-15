@@ -7,29 +7,32 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="grademanager.controller.AdminDashboardController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AdminDashboardController">
    <left>
-      <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #385170;" BorderPane.alignment="CENTER">
+      <VBox prefWidth="200.0" spacing="10.0" style="-fx-background-color: #f4f4f4;" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="studentManagementButton" mnemonicParsing="false" onAction="#handleStudentManagement" prefWidth="9.99999999999E11" text="Quản lý Sinh viên" />
-            <Button fx:id="teacherManagementButton" layoutX="20.0" layoutY="198.0" mnemonicParsing="false" onAction="#handleTeacherManagement" prefWidth="9.99999999999E11" text="Quản lý Giáo viên" />
-            <Button fx:id="classManagementButton" layoutX="20.0" layoutY="215.0" mnemonicParsing="false" onAction="#handleClassManagement" prefWidth="9.99999999999E11" text="Quản lý Lớp học" />
-            <Button fx:id="subjectManagementButton" layoutX="20.0" layoutY="233.0" mnemonicParsing="false" onAction="#handleSubjectManagement" prefWidth="9.99999999999E11" text="Quản lý Môn học" />
-            <Button fx:id="assignmentButton" layoutX="20.0" layoutY="250.0" mnemonicParsing="false" onAction="#handleAssignment" prefWidth="9.99999999999E11" text="Phân công Giảng dạy" />
+            <Label alignment="CENTER" prefHeight="50.0" prefWidth="200.0" text="ADMIN PANEL">
+               <font><Font name="System Bold" size="18.0" /></font>
+            </Label>
+            <Button fx:id="studentManagementButton" maxWidth="1.7976931348623157E308" onAction="#handleStudentManagement" text="Quản lý Sinh viên" />
+            <Button fx:id="teacherManagementButton" maxWidth="1.7976931348623157E308" onAction="#handleTeacherManagement" text="Quản lý Giáo viên" />
+            <Button fx:id="classManagementButton" maxWidth="1.7976931348623157E308" onAction="#handleClassManagement" text="Quản lý Lớp học" />
+            <Button fx:id="subjectManagementButton" maxWidth="1.7976931348623157E308" onAction="#handleSubjectManagement" text="Quản lý Môn học" />
+            <Button fx:id="assignmentButton" maxWidth="1.7976931348623157E308" onAction="#handleAssignment" text="Phân công Giảng dạy" />
             <Separator prefWidth="200.0" />
-            <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" text="Đăng xuất" />
+            <Button fx:id="logoutButton" maxWidth="1.7976931348623157E308" onAction="#handleLogout" text="Đăng xuất" />
          </children>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
+         <padding><Insets left="10.0" right="10.0" top="10.0" /></padding>
       </VBox>
    </left>
    <center>
-      <AnchorPane fx:id="mainContentPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <AnchorPane fx:id="mainContentPane" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="88.0" layoutY="183.0" text="Chào mừng Quản trị viên!" />
+            <Label text="Chào mừng đến với Hệ thống Quản lý!" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
+               <font><Font size="18.0" /></font>
+            </Label>
          </children>
       </AnchorPane>
    </center>
