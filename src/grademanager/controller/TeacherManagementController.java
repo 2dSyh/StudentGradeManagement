@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import grademanager.dao.TeacherDAO;
 import grademanager.model.Teacher;
 
 public class TeacherManagementController {
@@ -23,8 +24,8 @@ public class TeacherManagementController {
     @FXML private Button deleteButton;
     @FXML private Button clearButton;
 
-    // Danh sách dữ liệu mẫu
     private ObservableList<Teacher> teacherList = FXCollections.observableArrayList();
+    private TeacherDAO teacherDAO = new TeacherDAO();
 
     @FXML
     private void initialize() {
@@ -33,11 +34,16 @@ public class TeacherManagementController {
         fullNameColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getFullName()));
         usernameColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getUserName()));
 
+        // Load dữ liệu từ DB
+        teacherList.addAll(teacherDAO.getAll());
         teacherTableView.setItems(teacherList);
 
         // Lắng nghe chọn dòng trong bảng
         teacherTableView.getSelectionModel().selectedItemProperty().addListener(
             (obs, oldSelection, newSelection) -> showTeacherDetails(newSelection));
+
+        updateButton.setDisable(true);
+        deleteButton.setDisable(true);
     }
 
     @FXML
@@ -48,8 +54,13 @@ public class TeacherManagementController {
             passwordField.getText(),
             fullNameField.getText()
         );
-        teacherList.add(teacher);
-        clearForm();
+        if (teacherDAO.insert(teacher)) {
+            teacherList.add(teacher);
+            showAlert(Alert.AlertType.INFORMATION, "Thành công", "Thêm giáo viên thành công!");
+            clearForm();
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm giáo viên!");
+        }
     }
 
     @FXML
@@ -59,7 +70,12 @@ public class TeacherManagementController {
             selected.setFullName(fullNameField.getText());
             selected.setUserName(usernameField.getText());
             selected.setPassWord(passwordField.getText());
-            teacherTableView.refresh();
+            if (teacherDAO.update(selected)) {
+                teacherTableView.refresh();
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Cập nhật giáo viên thành công!");
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể cập nhật giáo viên!");
+            }
         }
     }
 
@@ -67,8 +83,13 @@ public class TeacherManagementController {
     private void handleDeleteButton() {
         Teacher selected = teacherTableView.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            teacherList.remove(selected);
-            clearForm();
+            if (teacherDAO.delete(selected.getUserId())) {
+                teacherList.remove(selected);
+                clearForm();
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Xóa giáo viên thành công!");
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa giáo viên!");
+            }
         }
     }
 
@@ -93,5 +114,13 @@ public class TeacherManagementController {
         passwordField.clear();
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
