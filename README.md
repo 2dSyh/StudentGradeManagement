@@ -6,7 +6,7 @@
 Ứng dụng desktop xây dựng bằng JavaFX và SQLite để quản lý thông tin học sinh, giáo viên, lớp học, môn học và điểm số.
 
 ## 2. Công nghệ sử dụng
-- Ngôn ngữ: Java 17
+- Ngôn ngữ: Java 25
 - Framework UI: JavaFX
 - CSDL: SQLite
 - Quản lý phiên bản: Git & GitHub

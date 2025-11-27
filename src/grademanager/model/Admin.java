@@ -1,6 +1,6 @@
-package model;
+package grademanager.model;
 
-public class Admin extends Users{
+public class Admin extends User{
     public Admin(){
         super();
         setRole("Admin");
