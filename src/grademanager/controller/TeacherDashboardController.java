@@ -6,8 +6,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.Parent;
 import javafx.fxml.FXMLLoader;
 import java.io.IOException;
-import java.lang.classfile.Label;
-
+import javafx.scene.control.Label;
 public class TeacherDashboardController {
     @FXML private Label welcomeLabel;
     @FXML private Button gradeManagementButton;
