@@ -3,7 +3,9 @@ package grademanager.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 import java.io.IOException;
 import javafx.scene.control.Label;
@@ -20,9 +22,17 @@ public class TeacherDashboardController {
     }
     
     @FXML
-    private void handleLogout(){
-        System.out.println("Đăng xuất");
-        loadView("/grademanager/view/LoginScreen.fxml");
+    private void handleLogout() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/grademanager/view/LoginScreen.fxml"));
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            stage.setScene(scene);
+            stage.centerOnScreen();
+            System.out.println("Đăng xuất thành công");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadView(String fxmlPath){
