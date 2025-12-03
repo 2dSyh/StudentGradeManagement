@@ -6,6 +6,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import grademanager.model.*;
+import grademanager.dao.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SchoolClassManagementController {
 
@@ -26,7 +30,6 @@ public class SchoolClassManagementController {
 
     private ClassroomDAO classroomDAO = new ClassroomDAO();
     private ObservableList<SchoolClass> classList = FXCollections.observableArrayList();
-
     private SchoolClass selectedClass;
 
     @FXML
@@ -40,8 +43,15 @@ public class SchoolClassManagementController {
         // Load dữ liệu từ DB
         loadClasses();
 
-        // Gắn dữ liệu mẫu cho ComboBox giáo viên (thực tế sẽ lấy từ TeacherDAO)
-        homeroomTeacherComboBox.setItems(FXCollections.observableArrayList("GV01 - Nguyễn Văn A", "GV02 - Trần Thị B"));
+        // TODO: thay bằng TeacherDAO.getAllNames() nếu có
+
+        TeacherDAO teacherDAO = new TeacherDAO();
+        List<Teacher> teachers = teacherDAO.getAll();
+        List<String> name =  new ArrayList<>();
+        for(Teacher t: teachers){
+            name.add(t.getFullName());
+        }
+        homeroomTeacherComboBox.setItems(FXCollections.observableArrayList(name));
 
         // Lắng nghe chọn dòng trong bảng
         classTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {

@@ -5,26 +5,27 @@ import grademanager.util.DatabaseConnector;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.Date;
 
 public class StudentDAO implements DAO<Student> {
     @Override
     public boolean insert(Student s) {
+        String sql = "INSERT INTO Students(full_name, date_of_birth, gender, address, class_id) VALUES (?,?,?,?,?)";
+        try (Connection conn = DatabaseConnector.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, s.getFullName());
+            pstmt.setDate(2, Date.valueOf(s.getDateOfBirth()));
+            pstmt.setString(3, s.getGender());
+            pstmt.setString(4, s.getAddress());
+            pstmt.setInt(5, s.getClassroom());
 
-        String sql = "INSERT INTO Students(student_id, full_name, date_of_birth, gender, address, class_id) VALUES (?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, s.getStudentId());
-            pstmt.setString(2, s.getFullName());
-            pstmt.setDate(3, Date.valueOf(s.getDateOfBirth()));
-            pstmt.setString(4, s.getGender());
-            pstmt.setString(5, s.getAddress());
-            pstmt.setInt(6, s.getClassroom());
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.out.println("Loi khi cap nhat hoc sinh: " + e.getMessage());
-            return false;
-        }
+            int affected = pstmt.executeUpdate();
+            if (affected > 0) {
+                ResultSet rs = pstmt.getGeneratedKeys();
+                if (rs.next()) s.setStudentId(rs.getInt(1));
+                return true;
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
     }
 
     @Override

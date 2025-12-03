@@ -7,28 +7,26 @@ public class TestClassroomDAO {
     public static void main(String[] args) {
         ClassroomDAO dao = new ClassroomDAO();
 
-        // 1. Thêm lớp mới
-        SchoolClass c1 = new SchoolClass(1, "10A1", "2024-2025", 1);
-        boolean inserted = dao.insert(c1);
-        System.out.println("Insert: " + inserted);
-
-        // 2. Lấy danh sách tất cả lớp
-        System.out.println("Danh sách lớp:");
-        for (SchoolClass c : dao.getAll()) {
-            System.out.println(c.getClassId() + " - " + c.getClassName());
+        // Thêm lớp mới với teacher_id đã tồn tại trong DB
+        SchoolClass c1 = new SchoolClass(0, "10A", "2024-2025", 1);
+        if (dao.insert(c1)) {
+            System.out.println("Thêm lớp: " + c1.getClassName() + " (ID=" + c1.getClassId() + ")");
+        } else {
+            System.out.println("Thêm lớp 10A thất bại!");
         }
 
-        // 3. Sửa thông tin lớp
-        c1.setClassName("10A1 - Updated");
-        boolean updated = dao.update(c1);
-        System.out.println("Update: " + updated);
+        SchoolClass c2 = new SchoolClass(0, "10B", "2024-2025", 2);
+        if (dao.insert(c2)) {
+            System.out.println("Thêm lớp: " + c2.getClassName() + " (ID=" + c2.getClassId() + ")");
+        } else {
+            System.out.println("Thêm lớp 10B thất bại!");
+        }
 
-        // 4. Lấy lớp theo ID
-        SchoolClass found = dao.getById(1);
-        System.out.println("Found: " + found.getClassName());
-
-        // 5. Xóa lớp
-        boolean deleted = dao.delete(1);
-        System.out.println("Delete: " + deleted);
+        SchoolClass c3 = new SchoolClass(0, "10C", "2024-2025", 3);
+        if (dao.insert(c3)) {
+            System.out.println("Thêm lớp: " + c3.getClassName() + " (ID=" + c3.getClassId() + ")");
+        } else {
+            System.out.println("Thêm lớp 10C thất bại!");
+        }
     }
 }

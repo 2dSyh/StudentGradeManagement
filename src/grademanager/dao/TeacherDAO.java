@@ -7,25 +7,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TeacherDAO implements DAO<Teacher> {
-    
-
     @Override
-    public boolean insert(Teacher t){
+    public boolean insert(Teacher t) {
+        String sql = "INSERT INTO Users(username, password, full_name, role) VALUES (?,?,?,?)";
+        try (Connection conn = DatabaseConnector.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, t.getUserName());
+            pstmt.setString(2, t.getPassWord());
+            pstmt.setString(3, t.getFullName());
+            pstmt.setString(4, t.getRole());
 
-        String sql = "INSERT INTO Users(user_id, username, password, full_name, role) VALUES (?,?,?,?,?)";
-
-        try(Connection conn = DatabaseConnector.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setInt(1, t.getUserId());
-            pstmt.setString(2, t.getUserName());
-            pstmt.setString(3, t.getPassWord());
-            pstmt.setString(4, t.getFullName());
-            pstmt.setString(5, "TEACHER");
-
-            return pstmt.executeUpdate() > 0;
-        }catch(SQLException e){
-            System.out.println("loi khi them giao vien: " + e.getMessage());
-            return false;
-        }
+            int affected = pstmt.executeUpdate();
+            if (affected > 0) {
+                ResultSet rs = pstmt.getGeneratedKeys();
+                if (rs.next()) t.setUserId(rs.getInt(1));
+                return true;
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
     }
 
 
