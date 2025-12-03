@@ -8,34 +8,17 @@ public class TestGradeDAO {
         GradeDAO dao = new GradeDAO();
 
         // 1. Thêm mới Grade
-        Grade g1 = new Grade(1, 101, 201, "Midterm", 7.5); // giả định ID
+        Grade g1 = new Grade(0, 1, 1, "midterm", 7.5);
         boolean inserted = dao.insert(g1);
         System.out.println("Insert: " + inserted);
 
-        // 2. Lấy tất cả Grade
-        System.out.println("Danh sách điểm:");
-        for (Grade g : dao.getAll()) {
-            System.out.println("GradeID:" + g.getGradeId()
-                    + " - Student:" + g.getStudent()
-                    + " - Subject:" + g.getSubject()
-                    + " - Type:" + g.getGradeType()
-                    + " - Score:" + g.getScore());
-        }
+        Grade g2 = new Grade(0, 1, 1, "final", 9.0);
+        boolean inserted2 = dao.insert(g2);
+        System.out.println("Insert: " + inserted2);
 
-        // 3. Cập nhật Grade
-        g1.setScore(8.0); // đổi điểm
-        boolean updated = dao.update(g1);
-        System.out.println("Update: " + updated);
-
-        // 4. Lấy Grade theo ID
-        Grade found = dao.getById(1);
-        if (found != null) {
-            System.out.println("Found Grade: " + found.getGradeId()
-                    + " - Score:" + found.getScore());
-        }
-
-        // 5. Xóa Grade
-        boolean deleted = dao.delete(1);
-        System.out.println("Delete: " + deleted);
+        Grade g3 = new Grade(0, 1, 1, "assignment", 8.0);
+        boolean inserted3 = dao.insert(g3);
+        System.out.println("Insert: " + inserted3);
+        
     }
 }

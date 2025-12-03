@@ -1,7 +1,11 @@
 package grademanager.controller;
 
 import grademanager.dao.GradeDAO;
+import grademanager.dao.SubjectDAO;
+import grademanager.dao.StudentDAO;
 import grademanager.model.Grade;
+import grademanager.model.Student;
+import grademanager.model.Subject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,105 +13,129 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DoubleStringConverter;
 
+import java.util.List;
+
 public class GradeManagementController {
 
-    @FXML private ComboBox<String> classComboBox;
-    @FXML private ComboBox<String> subjectComboBox;
+    @FXML private ComboBox<Integer> studentComboBox;   // chọn học sinh theo ID
+    @FXML private ComboBox<String> subjectComboBox;    // chọn môn theo tên
     @FXML private Button loadButton;
     @FXML private Button saveButton;
-    @FXML private Button avgButton;       // nút tính điểm trung bình môn
-    @FXML private Button gpaButton;       // nút tính GPA
+    @FXML private Button avgButton;
+    @FXML private Button gpaButton;
 
     @FXML private TableView<Grade> gradeTableView;
+    @FXML private TableColumn<Grade, Integer> gradeIdColumn;
     @FXML private TableColumn<Grade, Integer> studentIdColumn;
-    @FXML private TableColumn<Grade, String> studentNameColumn;
-    @FXML private TableColumn<Grade, Double> midtermScoreColumn;
-    @FXML private TableColumn<Grade, Double> finalScoreColumn;
+    @FXML private TableColumn<Grade, Integer> subjectIdColumn;
+    @FXML private TableColumn<Grade, String> gradeTypeColumn;
+    @FXML private TableColumn<Grade, Double> scoreColumn;
 
-    @FXML private Label avgLabel;         // hiển thị điểm trung bình môn
-    @FXML private Label gpaLabel;         // hiển thị GPA
+    @FXML private Label avgLabel;
+    @FXML private Label gpaLabel;
 
     private ObservableList<Grade> gradeList = FXCollections.observableArrayList();
     private GradeDAO gradeDAO = new GradeDAO();
+    private SubjectDAO subjectDAO = new SubjectDAO();
+    private StudentDAO studentDAO = new StudentDAO();
+
+    // Lưu danh sách để tiện tìm lại ID theo tên
+    private List<Student> students;
+    private List<Subject> subjects;
 
     @FXML
     private void initialize() {
-        // Gắn dữ liệu mẫu cho ComboBox
-        classComboBox.setItems(FXCollections.observableArrayList("10A1", "11B2", "12C3"));
-        subjectComboBox.setItems(FXCollections.observableArrayList("Toán", "Văn", "Anh"));
-
         // Gắn dữ liệu cột
+        gradeIdColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getGradeId()).asObject());
         studentIdColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getStudent()).asObject());
-        studentNameColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty("HS#" + cellData.getValue().getStudent()));
-
-        midtermScoreColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getScore()).asObject());
-        finalScoreColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getScore()).asObject());
+        subjectIdColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getSubject()).asObject());
+        gradeTypeColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getGradeType()));
+        scoreColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getScore()).asObject());
 
         // Cho phép chỉnh sửa trực tiếp điểm
-        midtermScoreColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        midtermScoreColumn.setOnEditCommit(event -> {
+        scoreColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        scoreColumn.setOnEditCommit(event -> {
             Grade g = event.getRowValue();
             g.setScore(event.getNewValue());
-        });
-
-        finalScoreColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        finalScoreColumn.setOnEditCommit(event -> {
-            Grade g = event.getRowValue();
-            g.setScore(event.getNewValue());
+            gradeDAO.update(g);
         });
 
         gradeTableView.setItems(gradeList);
         gradeTableView.setEditable(true);
-    }
 
-    @FXML
-    private void handleClassSelection() {
-        System.out.println("Lớp được chọn: " + classComboBox.getValue());
-    }
+        // Nạp danh sách học sinh và môn từ DAO
+        students = studentDAO.getAll();
+        subjects = subjectDAO.getAll();
 
-    @FXML
-    private void handleSubjectSelection() {
-        System.out.println("Môn được chọn: " + subjectComboBox.getValue());
+        studentComboBox.setItems(FXCollections.observableArrayList(
+            students.stream().map(Student::getStudentId).toList()
+        ));
+        subjectComboBox.setItems(FXCollections.observableArrayList(
+            subjects.stream().map(Subject::getSubjectName).toList()
+        ));
     }
 
     @FXML
     private void handleLoadGrades() {
-        // Tải dữ liệu mẫu (thực tế sẽ lấy từ DAO/database)
         gradeList.clear();
-        gradeList.add(new Grade(1, 101, 1, "Midterm", 7.5));
-        gradeList.add(new Grade(2, 101, 1, "Final", 8.0));
-        gradeList.add(new Grade(3, 101, 1, "Assignment", 9.0));
+
+        Integer studentId = studentComboBox.getValue();
+        String subjectName = subjectComboBox.getValue();
+
+        if (studentId == null || subjectName == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Thông báo");
+            alert.setHeaderText(null);
+            alert.setContentText("Vui lòng chọn học sinh và môn học trước khi tải điểm!");
+            alert.showAndWait();
+            return;
+        }
+
+        // Tìm subjectId từ danh sách subjects
+        int subjectId = subjects.stream()
+                .filter(s -> s.getSubjectName().equals(subjectName))
+                .findFirst()
+                .map(Subject::getSubjectId)
+                .orElse(-1);
+
+        gradeList.addAll(gradeDAO.getGradesByStudentAndSubject(studentId, subjectId));
     }
 
     @FXML
     private void handleSaveChanges() {
-        // Lưu dữ liệu (thực tế sẽ gọi DAO để update database)
         for (Grade g : gradeList) {
-            System.out.println("Lưu điểm: " + g.getStudent() + " - " + g.getScore());
+            gradeDAO.update(g);
         }
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Thông báo");
+        alert.setHeaderText(null);
+        alert.setContentText("Đã lưu thay đổi điểm thành công!");
+        alert.showAndWait();
     }
 
-    // ✅ Tính điểm trung bình môn cho sinh viên được chọn
     @FXML
     private void handleCalculateAverage() {
-        Grade selected = gradeTableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            double avg = gradeDAO.getWeightedAverageBySubject(selected.getStudent(), selected.getSubject());
+        Integer studentId = studentComboBox.getValue();
+        String subjectName = subjectComboBox.getValue();
+
+        if (studentId != null && subjectName != null) {
+            int subjectId = subjects.stream()
+                    .filter(s -> s.getSubjectName().equals(subjectName))
+                    .findFirst()
+                    .map(Subject::getSubjectId)
+                    .orElse(-1);
+
+            double avg = gradeDAO.getWeightedAverageBySubject(studentId, subjectId);
             avgLabel.setText("Điểm TB môn: " + String.format("%.2f", avg));
-        } else {
-            avgLabel.setText("Chọn một sinh viên để tính điểm TB môn");
         }
     }
 
-    // ✅ Tính GPA cho sinh viên được chọn
     @FXML
     private void handleCalculateGPA() {
-        Grade selected = gradeTableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            double gpa = gradeDAO.getOverallAverage(selected.getStudent());
+        Integer studentId = studentComboBox.getValue();
+        if (studentId != null) {
+            double gpa = gradeDAO.getOverallAverage(studentId);
             gpaLabel.setText("GPA: " + String.format("%.2f", gpa));
-        } else {
-            gpaLabel.setText("Chọn một sinh viên để tính GPA");
         }
     }
 }

@@ -26,6 +26,7 @@ public class TeacherManagementController {
 
     private ObservableList<Teacher> teacherList = FXCollections.observableArrayList();
     private TeacherDAO teacherDAO = new TeacherDAO();
+    private Teacher selectedTeacher;
 
     @FXML
     private void initialize() {
@@ -39,17 +40,29 @@ public class TeacherManagementController {
         teacherTableView.setItems(teacherList);
 
         // Lắng nghe chọn dòng trong bảng
-        teacherTableView.getSelectionModel().selectedItemProperty().addListener(
-            (obs, oldSelection, newSelection) -> showTeacherDetails(newSelection));
+        teacherTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                selectedTeacher = newSel;
+                showTeacherDetails(newSel);
+                updateButton.setDisable(false);
+                deleteButton.setDisable(false);
+            }
+        });
 
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
     }
 
+    private void showTeacherDetails(Teacher teacher) {
+        fullNameField.setText(teacher.getFullName());
+        usernameField.setText(teacher.getUserName());
+        passwordField.setText(teacher.getPassWord());
+    }
+
     @FXML
     private void handleAddButton() {
         Teacher teacher = new Teacher(
-            teacherList.size() + 1,
+            0,
             usernameField.getText(),
             passwordField.getText(),
             fullNameField.getText()
@@ -65,14 +78,14 @@ public class TeacherManagementController {
 
     @FXML
     private void handleUpdateButton() {
-        Teacher selected = teacherTableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            selected.setFullName(fullNameField.getText());
-            selected.setUserName(usernameField.getText());
-            selected.setPassWord(passwordField.getText());
-            if (teacherDAO.update(selected)) {
+        if (selectedTeacher != null) {
+            selectedTeacher.setFullName(fullNameField.getText());
+            selectedTeacher.setUserName(usernameField.getText());
+            selectedTeacher.setPassWord(passwordField.getText());
+            if (teacherDAO.update(selectedTeacher)) {
                 teacherTableView.refresh();
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Cập nhật giáo viên thành công!");
+                clearForm();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể cập nhật giáo viên!");
             }
@@ -81,12 +94,11 @@ public class TeacherManagementController {
 
     @FXML
     private void handleDeleteButton() {
-        Teacher selected = teacherTableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            if (teacherDAO.delete(selected.getUserId())) {
-                teacherList.remove(selected);
-                clearForm();
+        if (selectedTeacher != null) {
+            if (teacherDAO.delete(selectedTeacher.getUserId())) {
+                teacherList.remove(selectedTeacher);
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Xóa giáo viên thành công!");
+                clearForm();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa giáo viên!");
             }
@@ -98,20 +110,11 @@ public class TeacherManagementController {
         clearForm();
     }
 
-    private void showTeacherDetails(Teacher teacher) {
-        if (teacher != null) {
-            fullNameField.setText(teacher.getFullName());
-            usernameField.setText(teacher.getUserName());
-            passwordField.setText(teacher.getPassWord());
-            updateButton.setDisable(false);
-            deleteButton.setDisable(false);
-        }
-    }
-
     private void clearForm() {
         fullNameField.clear();
         usernameField.clear();
         passwordField.clear();
+        selectedTeacher = null;
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
     }

@@ -1,11 +1,15 @@
 package grademanager.controller;
 
+import java.util.List;
+
+import grademanager.dao.StudentDAO;
+import grademanager.model.SchoolClass;
+import grademanager.model.Student;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import grademanager.model.Student;
-
+import grademanager.dao.ClassroomDAO;
 public class StudentManagementController {
 
     @FXML private TableView<Student> studentTableView;
@@ -28,6 +32,8 @@ public class StudentManagementController {
     @FXML private Button clearButton;
 
     private ObservableList<Student> studentList = FXCollections.observableArrayList();
+    private StudentDAO studentDAO = new StudentDAO();
+    private Student selectedStudent;
 
     @FXML
     private void initialize() {
@@ -39,50 +45,78 @@ public class StudentManagementController {
         addressColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getAddress()));
         classColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getClassroom()).asObject());
 
+        // Load dữ liệu từ DB
+        studentList.addAll(studentDAO.getAll());
         studentTableView.setItems(studentList);
 
-        // Gắn dữ liệu mẫu cho comboBox
+        // Gắn dữ liệu cho comboBox
         genderComboBox.setItems(FXCollections.observableArrayList("Nam", "Nữ"));
-        classComboBox.setItems(FXCollections.observableArrayList(10, 11, 12));
+
+        ClassroomDAO classroomDAO = new ClassroomDAO();
+        List<SchoolClass> classes = classroomDAO.getAll();
+        List<Integer> classIds = classes.stream()
+                                        .map(SchoolClass::getClassId)
+                                        .toList();
+        classComboBox.setItems(FXCollections.observableArrayList(classIds));
 
         // Lắng nghe chọn dòng
         studentTableView.getSelectionModel().selectedItemProperty().addListener(
-            (obs, oldSelection, newSelection) -> showStudentDetails(newSelection));
+            (obs, oldSel, newSel) -> {
+                if (newSel != null) {
+                    selectedStudent = newSel;
+                    showStudentDetails(newSel);
+                    updateButton.setDisable(false);
+                    deleteButton.setDisable(false);
+                }
+            });
+    }
+
+    private void showStudentDetails(Student student) {
+        nameField.setText(student.getFullName());
+        dobPicker.setValue(student.getDateOfBirth());
+        genderComboBox.setValue(student.getGender());
+        addressField.setText(student.getAddress());
+        classComboBox.setValue(student.getClassroom());
     }
 
     @FXML
     private void handleAddButton() {
         Student student = new Student(
-            studentList.size() + 1,
+            0,
             nameField.getText(),
             dobPicker.getValue(),
             genderComboBox.getValue(),
             addressField.getText(),
             classComboBox.getValue()
         );
-        studentList.add(student);
-        clearForm();
+        if (studentDAO.insert(student)) {
+            studentList.add(student);
+            clearForm();
+        }
     }
 
     @FXML
     private void handleUpdateButton() {
-        Student selected = studentTableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            selected.setFullName(nameField.getText());
-            selected.setDateOfBirth(dobPicker.getValue());
-            selected.setGender(genderComboBox.getValue());
-            selected.setAddress(addressField.getText());
-            selected.setClass(classComboBox.getValue());
-            studentTableView.refresh();
+        if (selectedStudent != null) {
+            selectedStudent.setFullName(nameField.getText());
+            selectedStudent.setDateOfBirth(dobPicker.getValue());
+            selectedStudent.setGender(genderComboBox.getValue());
+            selectedStudent.setAddress(addressField.getText());
+            selectedStudent.setClass(classComboBox.getValue());
+            if (studentDAO.update(selectedStudent)) {
+                studentTableView.refresh();
+                clearForm();
+            }
         }
     }
 
     @FXML
     private void handleDeleteButton() {
-        Student selected = studentTableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            studentList.remove(selected);
-            clearForm();
+        if (selectedStudent != null) {
+            if (studentDAO.delete(selectedStudent.getStudentId())) {
+                studentList.remove(selectedStudent);
+                clearForm();
+            }
         }
     }
 
@@ -91,24 +125,13 @@ public class StudentManagementController {
         clearForm();
     }
 
-    private void showStudentDetails(Student student) {
-        if (student != null) {
-            nameField.setText(student.getFullName());
-            dobPicker.setValue(student.getDateOfBirth());
-            genderComboBox.setValue(student.getGender());
-            addressField.setText(student.getAddress());
-            classComboBox.setValue(student.getClassroom());
-            updateButton.setDisable(false);
-            deleteButton.setDisable(false);
-        }
-    }
-
     private void clearForm() {
         nameField.clear();
         dobPicker.setValue(null);
-        genderComboBox.setValue(null);
+        genderComboBox.getSelectionModel().clearSelection();
         addressField.clear();
-        classComboBox.setValue(null);
+        classComboBox.getSelectionModel().clearSelection();
+        selectedStudent = null;
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
     }

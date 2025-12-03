@@ -41,6 +41,9 @@ public class SubjectManagementController {
                 deleteButton.setDisable(false);
             }
         });
+
+        updateButton.setDisable(true);
+        deleteButton.setDisable(true);
     }
 
     private void loadSubjects() {
@@ -56,8 +59,10 @@ public class SubjectManagementController {
     private void handleAddButton() {
         Subject s = new Subject(0, subjectNameField.getText());
         if (subjectDAO.insert(s)) {
-            loadSubjects();
+            subjectList.add(s);
             clearForm();
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm môn học!");
         }
     }
 
@@ -66,8 +71,10 @@ public class SubjectManagementController {
         if (selectedSubject != null) {
             selectedSubject.setSubjectName(subjectNameField.getText());
             if (subjectDAO.update(selectedSubject)) {
-                loadSubjects();
+                subjectTableView.refresh();
                 clearForm();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể cập nhật môn học!");
             }
         }
     }
@@ -76,8 +83,10 @@ public class SubjectManagementController {
     private void handleDeleteButton() {
         if (selectedSubject != null) {
             if (subjectDAO.delete(selectedSubject.getSubjectId())) {
-                loadSubjects();
+                subjectList.remove(selectedSubject);
                 clearForm();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa môn học!");
             }
         }
     }
@@ -92,5 +101,13 @@ public class SubjectManagementController {
         selectedSubject = null;
         updateButton.setDisable(true);
         deleteButton.setDisable(true);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
