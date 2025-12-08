@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="650.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="grademanager.controller.GradeManagementController">
+<AnchorPane prefHeight="650.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="grademanager.controller.GradeManagementController">
    <children>
       <VBox spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
          <children>
@@ -22,25 +22,31 @@
             
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
-                  <Label text="Lớp:" />
-                  <ComboBox fx:id="classComboBox" onAction="#handleClassSelection" prefWidth="100.0" />
+                  <Label text="Học sinh:" />
+                  <ComboBox fx:id="studentComboBox" prefWidth="150.0" promptText="Chọn ID HS" />
+                  
                   <Label text="Môn:" />
-                  <ComboBox fx:id="subjectComboBox" onAction="#handleSubjectSelection" prefWidth="100.0" />
+                  <ComboBox fx:id="subjectComboBox" prefWidth="150.0" promptText="Chọn Môn" />
+                  
                   <Button fx:id="loadButton" onAction="#handleLoadGrades" text="Tải điểm" />
+                  
                   <Separator orientation="VERTICAL" />
+                  
                   <Button fx:id="saveButton" onAction="#handleSaveChanges" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Lưu Thay đổi" />
                </children>
             </HBox>
 
             <TableView fx:id="gradeTableView" editable="true" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn fx:id="studentIdColumn" editable="false" prefWidth="60.0" text="Mã HS" />
-                <TableColumn fx:id="studentNameColumn" editable="false" prefWidth="180.0" text="Họ và Tên" />
+                <TableColumn fx:id="gradeIdColumn" prefWidth="50.0" text="ID" />
                 
-                <TableColumn fx:id="assignmentScoreColumn" prefWidth="120.0" text="Đ.Thường xuyên (1)" />
+                <TableColumn fx:id="studentIdColumn" editable="false" prefWidth="80.0" text="Mã HS" />
                 
-                <TableColumn fx:id="midtermScoreColumn" prefWidth="100.0" text="Giữa kỳ (2)" />
-                <TableColumn fx:id="finalScoreColumn" prefWidth="100.0" text="Cuối kỳ (3)" />
+                <TableColumn fx:id="subjectIdColumn" editable="false" prefWidth="80.0" text="Mã Môn" />
+                
+                <TableColumn fx:id="gradeTypeColumn" prefWidth="150.0" text="Loại Điểm" />
+                
+                <TableColumn fx:id="scoreColumn" prefWidth="100.0" text="Điểm Số" />
               </columns>
                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
             </TableView>
@@ -50,9 +56,6 @@
                   <Label text="Công cụ:">
                      <font><Font name="System Bold" size="12.0" /></font>
                   </Label>
-                  
-                  <Button fx:id="assignmentButton" onAction="#handleCalculateAssignment" text="Tính Đ.Thành Phần" />
-                  <Label fx:id="assignmentAvgLabel" text="..." textFill="#666666" />
                   
                   <Separator orientation="VERTICAL" />
                   
