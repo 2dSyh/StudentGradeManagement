@@ -7,6 +7,8 @@ import javafx.scene.Parent;
 import javafx.fxml.FXMLLoader;
 import java.io.IOException;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
 
 public class TeacherDashboardController {
 
@@ -17,22 +19,30 @@ public class TeacherDashboardController {
 
     @FXML
     private void handleGradeManagement() {
-        // Mở màn hình nhập/xem điểm
         loadView("/grademanager/view/GradeManagementView.fxml");
     }
 
     @FXML
     private void handleLogout() {
-        // Quay lại màn hình đăng nhập
-        loadView("/grademanager/view/LoginScreen.fxml");
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/grademanager/view/LoginScreen.fxml"));
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            stage.setScene(scene);
+            stage.centerOnScreen();
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     private void loadView(String fxmlPath) {
         try {
             Parent view = FXMLLoader.load(getClass().getResource(fxmlPath));
+            // --- FIX: ANCHOR (STRETCH TO FIT) ---
+            AnchorPane.setTopAnchor(view, 0.0);
+            AnchorPane.setBottomAnchor(view, 0.0);
+            AnchorPane.setLeftAnchor(view, 0.0);
+            AnchorPane.setRightAnchor(view, 0.0);
+            // ------------------------------------
             mainContentPane.getChildren().setAll(view);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 }
