@@ -17,7 +17,7 @@
       </Label>
       <TextField fx:id="usernameField" promptText="Tên đăng nhập" />
       <PasswordField fx:id="passwordField" promptText="Mật khẩu" />
-      <Button fx:id="loginButton" mnemonicParsing="false" onAction="#handleLoginButtonAction" prefWidth="100.0" text="Đăng nhập" />
+      <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#handleLoginButtonAction" prefWidth="100.0" text="Đăng nhập" />
       <Label fx:id="errorLabel" textFill="RED" />
    </children>
    <padding>
