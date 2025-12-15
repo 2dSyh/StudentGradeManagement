@@ -1,0 +1,201 @@
+Dưới đây là file tổng hợp giải thích chi tiết toàn bộ dự án mã nguồn của bạn. Tôi đã nhóm các phần code có cấu trúc giống nhau (như Model, DAO, Controller cơ bản) để giải thích một lần giúp bạn dễ hiểu nguyên lý, sau đó đi sâu vào các phần logic đặc thù.
+
+--- START OF FILE GIAI_THICH_CODE.txt ---
+
+TÀI LIỆU GIẢI THÍCH MÃ NGUỒN DỰ ÁN QUẢN LÝ ĐIỂM (GRADE MANAGER)
+1. CẤU TRÚC TỔNG QUAN
+
+Dự án được xây dựng theo mô hình MVC (Model - View - Controller) kết hợp với mẫu thiết kế DAO (Data Access Object).
+
+Model: Chứa các class đại diện cho dữ liệu (Sinh viên, Điểm, Giáo viên...).
+
+View (FXML): Giao diện người dùng.
+
+Controller: Xử lý logic, phản hồi sự kiện từ View.
+
+DAO: Chịu trách nhiệm làm việc trực tiếp với Cơ sở dữ liệu (SQLite).
+
+2. PHẦN KHỞI CHẠY (ENTRY POINT)
+File: src\grademanager\Launcher.java
+
+Mục đích: Đây là class mồi để chạy ứng dụng.
+
+Code: Main.main(args); gọi đến hàm main của class Main. Việc tách ra như này giúp tránh lỗi module khi build file JAR trong một số phiên bản JavaFX.
+
+File: src\grademanager\Main.java
+
+start(Stage primaryStage): Hàm khởi tạo chính của JavaFX.
+
+FXMLLoader.load(...): Tải file giao diện đăng nhập (LoginScreen.fxml).
+
+primaryStage.setTitle(...): Đặt tên tiêu đề cửa sổ ứng dụng.
+
+primaryStage.setScene(scene): Đặt khung cảnh (scene) vào cửa sổ và hiển thị lên.
+
+3. PHẦN UTILITY (CÔNG CỤ DÙNG CHUNG)
+File: src\grademanager\util\DatabaseConnector.java
+
+URL = "jdbc:sqlite:database/quanlydiem.db": Định nghĩa đường dẫn tới file cơ sở dữ liệu SQLite.
+
+getConnection():
+
+Class.forName("org.sqlite.JDBC"): Nạp driver SQLite để Java hiểu cách giao tiếp với DB.
+
+DriverManager.getConnection(URL): Tạo và trả về một đối tượng Connection để các class khác dùng kết nối DB.
+
+4. PHẦN MODEL (DỮ LIỆU)
+
+Các file: Student.java, Teacher.java, Subject.java, Grade.java, Assignment.java, User.java, SchoolClass.java
+
+Cấu trúc chung (Giải thích 1 lần):
+Các file này là POJO (Plain Old Java Object), chỉ dùng để chứa dữ liệu.
+
+Thuộc tính (Private fields): Ví dụ private int studentId;. Các biến này bị ẩn đi để bảo mật (Encapsulation).
+
+Constructor:
+
+Empty Constructor: Để tạo đối tượng rỗng.
+
+Full Constructor: Để tạo đối tượng với đầy đủ dữ liệu ngay lập tức.
+
+Getters/Setters: Các hàm công khai để lấy (get) hoặc gán (set) giá trị cho các thuộc tính private.
+
+toString(): Ghi đè phương thức này để khi in đối tượng ra (ví dụ trong Console hoặc ComboBox), nó sẽ hiện chuỗi ký tự dễ đọc thay vì mã hash của bộ nhớ.
+
+Điểm đặc biệt:
+
+User.java: Class cha, chứa thông tin chung (username, password, role).
+
+Admin.java, Teacher.java: Kế thừa từ User, tái sử dụng code của User.
+
+SchoolClass.java: Có list student để chứa danh sách học sinh thuộc lớp đó.
+
+5. PHẦN DAO (TRUY XUẤT DỮ LIỆU)
+
+Các file trong src\grademanager\dao\
+
+Cấu trúc chung (Giải thích 1 lần):
+Các class này thực hiện 4 tác vụ CRUD (Create, Read, Update, Delete). Chúng sử dụng PreparedStatement để tránh lỗi bảo mật SQL Injection.
+
+insert(Object o):
+
+Viết câu lệnh SQL INSERT INTO....
+
+Gán giá trị vào dấu ?.
+
+executeUpdate(): Chạy lệnh.
+
+getGeneratedKeys(): Lấy ID mà database vừa tự động tạo ra để gán ngược lại vào đối tượng Java.
+
+update(Object o): Dùng lệnh SQL UPDATE ... SET ... WHERE id = ?.
+
+delete(int id): Dùng lệnh SQL DELETE FROM ... WHERE id = ?.
+
+getAll():
+
+Dùng SELECT * FROM ....
+
+rs.next(): Duyệt qua từng dòng kết quả trả về.
+
+new Object(...): Tạo đối tượng Java từ dữ liệu dòng đó và thêm vào List.
+
+Logic đặc thù:
+
+File: GradeDAO.java
+
+getWeightedAverageBySubject(...): Hàm tính điểm trung bình môn.
+
+Lấy danh sách điểm theo student_id và subject_id.
+
+Phân loại điểm (midterm, final, assignment).
+
+Công thức: (midterm * 2 + final * 3 + assignmentAvg) / 6.
+
+File: UserDAO.java
+
+login(username, password): Kiểm tra xem có dòng nào trong bảng Users khớp cả username và password không. Nếu có trả về đối tượng User, nếu không trả về null.
+
+6. PHẦN CONTROLLER (XỬ LÝ LOGIC GIAO DIỆN)
+File: LoginController.java
+
+handleLoginButtonAction():
+
+Lấy text từ ô user/pass.
+
+Gọi userDAO.login().
+
+Phân quyền: Nếu role là "admin" -> chuyển sang màn hình AdminDashboard. Nếu là "teacher" -> chuyển sang TeacherDashboard.
+
+File: AdminDashboardController.java & TeacherDashboardController.java
+
+Chức năng: Điều hướng menu chính.
+
+loadView(String fxmlPath): Hàm tiện ích để thay đổi nội dung ở giữa màn hình (mainContentPane).
+
+AnchorPane Constraints: Code thiết lập AnchorPane.setTopAnchor(view, 0.0)... để đảm bảo giao diện con luôn giãn đầy màn hình cha.
+
+File: StudentManagementController.java, Teacher..., Subject..., SchoolClass...
+
+Các file này quản lý danh sách (CRUD giao diện).
+
+initialize(): Chạy khi màn hình mở lên.
+
+Thiết lập các cột cho TableView (cột nào hiển thị dữ liệu nào).
+
+Gọi DAO load dữ liệu từ DB lên bảng.
+
+TableView Selection Listener: Khi click vào một dòng trong bảng, đổ dữ liệu dòng đó lên các ô nhập liệu (TextField) để sửa.
+
+Các nút Thêm/Sửa/Xóa: Lấy dữ liệu từ ô nhập, gọi hàm tương ứng bên DAO, sau đó xóa trắng form (clearForm).
+
+File: AssignmentController.java (Logic phức tạp)
+
+Vấn đề: Bảng Assignments trong database chỉ lưu ID (TeacherID, ClassID...). Nhưng trên giao diện cần hiện Tên Giáo viên, Tên Lớp.
+
+Giải pháp (Hàm setupTableColumns):
+
+Dùng Stream API: teachers.stream().filter(...).
+
+Tìm trong danh sách giáo viên xem ai có ID trùng với ID trong phân công, rồi lấy tên người đó hiển thị ra.
+
+File: GradeManagementController.java (Logic phức tạp nhất)
+
+handleLoadGrades():
+
+Lấy điểm thật từ Database.
+
+Định nghĩa một cấu trúc điểm chuẩn gồm 5 đầu điểm: 3 bài Assignment, 1 Midterm, 1 Final.
+
+Trộn (Mixing Logic):
+
+Duyệt qua cấu trúc chuẩn.
+
+Nếu DB đã có điểm đó -> Hiển thị điểm đó.
+
+Nếu DB chưa có -> Tạo một điểm ảo (Ghost Grade, ID = 0, Score = 0) để hiển thị ô trống cho giáo viên nhập.
+
+scoreColumn.setCellFactory(...): Cho phép sửa trực tiếp trên bảng (Edit in place).
+
+handleSaveChanges():
+
+Duyệt qua danh sách trên bảng.
+
+Nếu ID == 0 (Ghost Grade) -> Gọi INSERT (Thêm mới).
+
+Nếu ID != 0 (Điểm cũ) -> Gọi UPDATE (Cập nhật).
+
+7. PHẦN TEST (KIỂM THỬ)
+
+Các file trong src\test\
+
+CleanDatabase.java / DatabaseResetTest.java:
+
+Chạy lệnh SQL DELETE FROM ... để xóa sạch dữ liệu cũ.
+
+Reset lại bộ đếm ID (Auto Increment) về 1.
+
+Quan trọng: Tạo lại 1 tài khoản Admin mặc định (admin/123) để không bị mất quyền truy cập sau khi xóa sạch DB.
+
+Các file Test...DAO.java: Các file main nhỏ để test xem hàm Insert/Select có hoạt động đúng không trước khi ghép vào giao diện.
+
+--- END OF FILE GIAI_THICH_CODE.txt ---

@@ -23,69 +23,34 @@ public class AdminDashboardController {
 
     @FXML private AnchorPane mainContentPane;
 
-    // Má»Ÿ mÃ n hÃ¬nh quáº£n lÃ½ sinh viÃªn
-    @FXML
-    private void handleStudentManagement() {
-        loadView("/grademanager/view/StudentManagementView.fxml");
-    }
+    @FXML private void handleStudentManagement() { loadView("/grademanager/view/StudentManagementView.fxml"); }
+    @FXML private void handleTeacherManagement() { loadView("/grademanager/view/TeacherManagementView.fxml"); }
+    @FXML private void handleClassManagement() { loadView("/grademanager/view/SchoolClassManagementView.fxml"); }
+    @FXML private void handleSubjectManagement() { loadView("/grademanager/view/SubjectManagementView.fxml"); }
+    @FXML private void handleAssignment() { loadView("/grademanager/view/AssignmentView.fxml"); }
 
-    // Má»Ÿ mÃ n hÃ¬nh quáº£n lÃ½ giÃ¡o viÃªn
-    @FXML
-    private void handleTeacherManagement() {
-        loadView("/grademanager/view/TeacherManagementView.fxml");
-    }
-
-    // Má»Ÿ mÃ n hÃ¬nh quáº£n lÃ½ lá»›p há»c
-    @FXML
-    private void handleClassManagement() {
-        loadView("/grademanager/view/SchoolClassManagementView.fxml");
-    }
-
-    // Má»Ÿ mÃ n hÃ¬nh quáº£n lÃ½ mÃ´n há»c
-    @FXML
-    private void handleSubjectManagement() {
-        loadView("/grademanager/view/SubjectManagementView.fxml");
-    }
-
-    // Má»Ÿ mÃ n hÃ¬nh phÃ¢n cÃ´ng giáº£ng dáº¡y
-    @FXML
-    private void handleAssignment() {
-        loadView("/grademanager/view/AssignmentView.fxml");
-    }
-
-    // ÄÄƒng xuáº¥t
-    // ÄÄƒng xuáº¥t - Cáº§n thay Ä‘á»•i toÃ n bá»™ Scene chá»© khÃ´ng chá»‰ loadView
     @FXML
     private void handleLogout() {
         try {
-            // 1. Load file FXML cá»§a mÃ n hÃ¬nh Login
-            // LÆ°u Ã½: Äáº£m báº£o Ä‘Æ°á»ng dáº«n Ä‘Ãºng lÃ  LoginScreen.fxml
             Parent root = FXMLLoader.load(getClass().getResource("/grademanager/view/LoginScreen.fxml"));
-            
-            // 2. Táº¡o Scene má»›i
             Scene scene = new Scene(root);
-            
-            // 3. Láº¥y Stage (cá»­a sá»•) hiá»‡n táº¡i tá»« nÃºt Logout
             Stage stage = (Stage) logoutButton.getScene().getWindow();
-            
-            // 4. Set Scene má»›i cho Stage (thay tháº¿ hoÃ n toÃ n giao diá»‡n cÅ©)
             stage.setScene(scene);
-            stage.centerOnScreen(); // CÄƒn giá»¯a mÃ n hÃ¬nh cho Ä‘áº¹p
-            
-            System.out.println("ÄÄƒng xuáº¥t thÃ nh cÃ´ng!");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            stage.centerOnScreen();
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    // HÃ m tiá»‡n Ã­ch Ä‘á»ƒ load view khÃ¡c vÃ o mainContentPane
     private void loadView(String fxmlPath) {
         try {
             Parent view = FXMLLoader.load(getClass().getResource(fxmlPath));
+            // --- FIX: ANCHOR (STRETCH TO FIT) ---
+            AnchorPane.setTopAnchor(view, 0.0);
+            AnchorPane.setBottomAnchor(view, 0.0);
+            AnchorPane.setLeftAnchor(view, 0.0);
+            AnchorPane.setRightAnchor(view, 0.0);
+            // ------------------------------------
             mainContentPane.getChildren().setAll(view);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 }
 
@@ -94,24 +59,25 @@ public class AdminDashboardController {
 ----------------------------------------------------------------
 package grademanager.controller;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import java.util.ArrayList;
+import javafx.util.StringConverter;
 import java.util.List;
-
 import grademanager.dao.*;
 import grademanager.model.*;
 
 public class AssignmentController {
 
-    @FXML private ComboBox<String> teacherComboBox;
-    @FXML private ComboBox<String> classComboBox;
-    @FXML private ComboBox<String> subjectComboBox;
+    // Sá»¬A: DÃ¹ng Object thá»±c thay vÃ¬ String Ä‘á»ƒ láº¥y ID chÃ­nh xÃ¡c
+    @FXML private ComboBox<Teacher> teacherComboBox;
+    @FXML private ComboBox<SchoolClass> classComboBox;
+    @FXML private ComboBox<Subject> subjectComboBox;
 
     @FXML private TableView<Assignment> assignmentTableView;
+    // Cá»™t Ä‘Æ°á»£c Ä‘á»‹nh nghÄ©a lÃ  String vÃ¬ code sáº½ lookup tÃªn giÃ¡o viÃªn/lá»›p
     @FXML private TableColumn<Assignment, String> teacherNameColumn;
     @FXML private TableColumn<Assignment, String> classNameColumn;
     @FXML private TableColumn<Assignment, String> subjectNameColumn;
@@ -121,48 +87,98 @@ public class AssignmentController {
 
     private ObservableList<Assignment> assignmentList = FXCollections.observableArrayList();
     private AssignmentDAO assignmentDAO = new AssignmentDAO();
+    
+    // Cache lists Ä‘á»ƒ tra cá»©u tÃªn giÃ¡o viÃªn/lá»›p
+    private List<Teacher> teachers;
+    private List<SchoolClass> classes;
+    private List<Subject> subjects;
+    private TeacherDAO teacherDAO = new TeacherDAO();
+    private ClassroomDAO classroomDAO = new ClassroomDAO();
+    private SubjectDAO subjectDAO = new SubjectDAO();
+
 
     @FXML
     private void initialize() {
+        loadDataForComboBoxes();
+        setupTableColumns();
+        loadTableData();
+    }
+
+    private void loadDataForComboBoxes() {
+        // Teacher
+        teachers = teacherDAO.getAll();
+        teacherComboBox.setItems(FXCollections.observableArrayList(teachers));
+        teacherComboBox.setConverter(new StringConverter<Teacher>() {
+            @Override public String toString(Teacher t) { return t != null ? t.getFullName() : ""; }
+            @Override public Teacher fromString(String string) { return null; }
+        });
+
+        // Class
+        classes = classroomDAO.getAll();
+        classComboBox.setItems(FXCollections.observableArrayList(classes));
+        classComboBox.setConverter(new StringConverter<SchoolClass>() {
+            @Override public String toString(SchoolClass c) { return c != null ? c.getClassName() : ""; }
+            @Override public SchoolClass fromString(String string) { return null; }
+        });
+
+        // Subject
+        subjects = subjectDAO.getAll();
+        subjectComboBox.setItems(FXCollections.observableArrayList(subjects));
+        subjectComboBox.setConverter(new StringConverter<Subject>() {
+            @Override public String toString(Subject s) { return s != null ? s.getSubjectName() : ""; }
+            @Override public Subject fromString(String string) { return null; }
+        });
+    }
+
+    private void setupTableColumns() {
+        // FIX Lá»–I HIá»‚N THá»Š: Ãnh xáº¡ ID sang TÃªn GiÃ¡o viÃªn
+        teacherNameColumn.setCellValueFactory(cell -> {
+            int id = cell.getValue().getTeacherId();
+            String name = teachers.stream().filter(t -> t.getUserId() == id)
+                          .findFirst().map(Teacher::getFullName).orElse("ID: " + id);
+            return new SimpleStringProperty(name);
+        });
+
+        // FIX Lá»–I HIá»‚N THá»Š: Ãnh xáº¡ ID sang TÃªn Lá»›p
+        classNameColumn.setCellValueFactory(cell -> {
+            int id = cell.getValue().getClassId();
+            String name = classes.stream().filter(c -> c.getClassId() == id)
+                          .findFirst().map(SchoolClass::getClassName).orElse("ID: " + id);
+            return new SimpleStringProperty(name);
+        });
+
+        // FIX Lá»–I HIá»‚N THá»Š: Ãnh xáº¡ ID sang TÃªn MÃ´n
+        subjectNameColumn.setCellValueFactory(cell -> {
+            int id = cell.getValue().getSubjectId();
+            String name = subjects.stream().filter(s -> s.getSubjectId() == id)
+                          .findFirst().map(Subject::getSubjectName).orElse("ID: " + id);
+            return new SimpleStringProperty(name);
+        });
+    }
+
+    private void loadTableData() {
+        assignmentList.clear();
         assignmentList.addAll(assignmentDAO.getAll());
         assignmentTableView.setItems(assignmentList);
-
-        //Láº¥y tÃªn giÃ¡o viÃªn
-        TeacherDAO teacherDAO = new TeacherDAO();
-        List<Teacher> teachers = teacherDAO.getAll();
-        List<String> name =  new ArrayList<>();
-        for(Teacher t: teachers){
-            name.add(t.getFullName());
-        }
-        teacherComboBox.setItems(FXCollections.observableArrayList(name));
-        
-        //Láº¥y tÃªn lá»›p
-        ClassroomDAO classroomDAO = new ClassroomDAO();
-        List<SchoolClass> classes = classroomDAO.getAll();
-        List<String> classNames = new ArrayList<>();
-        for(SchoolClass c: classes){
-            classNames.add(c.getClassName());
-        }
-        classComboBox.setItems(FXCollections.observableArrayList(classNames));
-        
-        //Láº¥y tÃªn mÃ´n há»c
-        SubjectDAO subjectDAO = new SubjectDAO();
-        List<Subject> subjects = subjectDAO.getAll();
-        List<String> subjectNames = new ArrayList<>();
-        for(Subject s: subjects){
-            subjectNames.add(s.getSubjectName());
-        }
-        subjectComboBox.setItems(FXCollections.observableArrayList(subjectNames));
     }
 
     @FXML
     private void handleAddButton() {
-        Assignment assignment = new Assignment(0,
-            teacherComboBox.getSelectionModel().getSelectedIndex() + 1,
-            classComboBox.getSelectionModel().getSelectedIndex() + 1,
-            subjectComboBox.getSelectionModel().getSelectedIndex() + 1);
+        Teacher t = teacherComboBox.getValue();
+        SchoolClass c = classComboBox.getValue();
+        Subject s = subjectComboBox.getValue();
+
+        if (t == null || c == null || s == null) {
+            showAlert("Vui lÃ²ng chá»n Ä‘áº§y Ä‘á»§ thÃ´ng tin!");
+            return;
+        }
+
+        // Sá»¬A: Láº¥y ID tá»« Object (An toÃ n hÆ¡n logic index + 1)
+        Assignment assignment = new Assignment(0, t.getUserId(), c.getClassId(), s.getSubjectId());
+        
         if (assignmentDAO.insert(assignment)) {
-            assignmentList.add(assignment);
+            loadTableData(); 
+            showAlert("ThÃªm phÃ¢n cÃ´ng thÃ nh cÃ´ng!");
         }
     }
 
@@ -171,7 +187,14 @@ public class AssignmentController {
         Assignment selected = assignmentTableView.getSelectionModel().getSelectedItem();
         if (selected != null && assignmentDAO.delete(selected.getAssignmentId())) {
             assignmentList.remove(selected);
+            showAlert("ÄÃ£ xÃ³a phÃ¢n cÃ´ng!");
         }
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText(message);
+        alert.show();
     }
 }
 
@@ -186,137 +209,170 @@ import grademanager.dao.StudentDAO;
 import grademanager.model.Grade;
 import grademanager.model.Student;
 import grademanager.model.Subject;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GradeManagementController {
 
-    @FXML private ComboBox<Integer> studentComboBox;   // chá»n há»c sinh theo ID
-    @FXML private ComboBox<String> subjectComboBox;    // chá»n mÃ´n theo tÃªn
+    @FXML private ComboBox<Student> studentComboBox;
+    @FXML private ComboBox<Subject> subjectComboBox;
     @FXML private Button loadButton;
     @FXML private Button saveButton;
     @FXML private Button avgButton;
     @FXML private Button gpaButton;
+    @FXML private Label avgLabel;
+    @FXML private Label gpaLabel;
+
 
     @FXML private TableView<Grade> gradeTableView;
+    // Khai bÃ¡o cÃ¡c cá»™t Ä‘á»ƒ fix lá»—i Type Mismatch
     @FXML private TableColumn<Grade, Integer> gradeIdColumn;
     @FXML private TableColumn<Grade, Integer> studentIdColumn;
     @FXML private TableColumn<Grade, Integer> subjectIdColumn;
-    @FXML private TableColumn<Grade, String> gradeTypeColumn;
+    @FXML private TableColumn<Grade, String> gradeTypeColumn; 
     @FXML private TableColumn<Grade, Double> scoreColumn;
-
-    @FXML private Label avgLabel;
-    @FXML private Label gpaLabel;
 
     private ObservableList<Grade> gradeList = FXCollections.observableArrayList();
     private GradeDAO gradeDAO = new GradeDAO();
     private SubjectDAO subjectDAO = new SubjectDAO();
     private StudentDAO studentDAO = new StudentDAO();
 
-    // LÆ°u danh sÃ¡ch Ä‘á»ƒ tiá»‡n tÃ¬m láº¡i ID theo tÃªn
-    private List<Student> students;
-    private List<Subject> subjects;
-
     @FXML
     private void initialize() {
-        // Gáº¯n dá»¯ liá»‡u cá»™t
-        gradeIdColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getGradeId()).asObject());
-        studentIdColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getStudent()).asObject());
-        subjectIdColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleIntegerProperty(cellData.getValue().getSubject()).asObject());
-        gradeTypeColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getGradeType()));
-        scoreColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getScore()).asObject());
+        setupComboBoxes();
+        setupTableColumns();
+    }
 
-        // Cho phÃ©p chá»‰nh sá»­a trá»±c tiáº¿p Ä‘iá»ƒm
+    private void setupTableColumns() {
+        gradeIdColumn.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getGradeId()).asObject());
+        studentIdColumn.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getStudent()).asObject());
+        subjectIdColumn.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getSubject()).asObject());
+        gradeTypeColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getGradeType()));
+        scoreColumn.setCellValueFactory(cell -> new SimpleDoubleProperty(cell.getValue().getScore()).asObject());
+
         scoreColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        
         scoreColumn.setOnEditCommit(event -> {
             Grade g = event.getRowValue();
             g.setScore(event.getNewValue());
-            gradeDAO.update(g);
         });
 
         gradeTableView.setItems(gradeList);
         gradeTableView.setEditable(true);
+    }
 
-        // Náº¡p danh sÃ¡ch há»c sinh vÃ  mÃ´n tá»« DAO
-        students = studentDAO.getAll();
-        subjects = subjectDAO.getAll();
+    private void setupComboBoxes() {
+        // Load danh sÃ¡ch há»c sinh
+        List<Student> students = studentDAO.getAll();
+        studentComboBox.setItems(FXCollections.observableArrayList(students));
+        studentComboBox.setConverter(new StringConverter<Student>() {
+            @Override public String toString(Student s) { return (s == null) ? "" : s.getFullName(); }
+            @Override public Student fromString(String string) { return null; }
+        });
 
-        studentComboBox.setItems(FXCollections.observableArrayList(
-            students.stream().map(Student::getStudentId).toList()
-        ));
-        subjectComboBox.setItems(FXCollections.observableArrayList(
-            subjects.stream().map(Subject::getSubjectName).toList()
-        ));
+        // Load danh sÃ¡ch mÃ´n há»c
+        List<Subject> subjects = subjectDAO.getAll();
+        subjectComboBox.setItems(FXCollections.observableArrayList(subjects));
+        subjectComboBox.setConverter(new StringConverter<Subject>() {
+            @Override public String toString(Subject s) { return (s == null) ? "" : s.getSubjectName(); }
+            @Override public Subject fromString(String string) { return null; }
+        });
     }
 
     @FXML
     private void handleLoadGrades() {
         gradeList.clear();
+        Student selectedStudent = studentComboBox.getValue();
+        Subject selectedSubject = subjectComboBox.getValue();
 
-        Integer studentId = studentComboBox.getValue();
-        String subjectName = subjectComboBox.getValue();
-
-        if (studentId == null || subjectName == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("ThÃ´ng bÃ¡o");
-            alert.setHeaderText(null);
-            alert.setContentText("Vui lÃ²ng chá»n há»c sinh vÃ  mÃ´n há»c trÆ°á»›c khi táº£i Ä‘iá»ƒm!");
-            alert.showAndWait();
+        if (selectedStudent == null || selectedSubject == null) {
+            showAlert("Vui lÃ²ng chá»n Há»c sinh vÃ  MÃ´n há»c!");
             return;
         }
 
-        // TÃ¬m subjectId tá»« danh sÃ¡ch subjects
-        int subjectId = subjects.stream()
-                .filter(s -> s.getSubjectName().equals(subjectName))
-                .findFirst()
-                .map(Subject::getSubjectId)
-                .orElse(-1);
+        int studentId = selectedStudent.getStudentId();
+        int subjectId = selectedSubject.getSubjectId();
 
-        gradeList.addAll(gradeDAO.getGradesByStudentAndSubject(studentId, subjectId));
+        // 1. Get Real Grades from DB
+        List<Grade> dbGrades = gradeDAO.getGradesByStudentAndSubject(studentId, subjectId);
+        
+        // 2. Define the required structure (5 slots total: 3x1, 1x2, 1x3)
+        List<String> requiredStructure = List.of(
+            "assignment", "assignment", "assignment", 
+            "midterm",    
+            "final"       
+        );
+
+        // 3. The Mixing Logic: Find existing grades and fill gaps with new Grade(0) objects
+        List<Grade> tempDbList = new java.util.ArrayList<>(dbGrades);
+
+        for (String type : requiredStructure) {
+            Grade foundGrade = null;
+
+            // Search for a matching real grade in the temp list
+            for (Grade g : tempDbList) {
+                if (g.getGradeType().equalsIgnoreCase(type)) {
+                    foundGrade = g;
+                    break;
+                }
+            }
+
+            if (foundGrade != null) {
+                gradeList.add(foundGrade);
+                tempDbList.remove(foundGrade); // Mark as used
+            } else {
+                // Create a Ghost Grade (ID: 0) to fill the empty slot
+                gradeList.add(new Grade(0, studentId, subjectId, type, 0.0));
+            }
+        }
     }
 
     @FXML
     private void handleSaveChanges() {
         for (Grade g : gradeList) {
-            gradeDAO.update(g);
+            if (g.getGradeId() == 0) {
+                gradeDAO.insert(g); // INSERT NEW
+            } else {
+                gradeDAO.update(g); // UPDATE EXISTING
+            }
         }
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("ThÃ´ng bÃ¡o");
-        alert.setHeaderText(null);
-        alert.setContentText("ÄÃ£ lÆ°u thay Ä‘á»•i Ä‘iá»ƒm thÃ nh cÃ´ng!");
-        alert.showAndWait();
+        handleLoadGrades(); // Reload to update IDs (Ghost -> Real)
+        showAlert("ÄÃ£ lÆ°u dá»¯ liá»‡u thÃ nh cÃ´ng!");
     }
 
     @FXML
     private void handleCalculateAverage() {
-        Integer studentId = studentComboBox.getValue();
-        String subjectName = subjectComboBox.getValue();
-
-        if (studentId != null && subjectName != null) {
-            int subjectId = subjects.stream()
-                    .filter(s -> s.getSubjectName().equals(subjectName))
-                    .findFirst()
-                    .map(Subject::getSubjectId)
-                    .orElse(-1);
-
-            double avg = gradeDAO.getWeightedAverageBySubject(studentId, subjectId);
-            avgLabel.setText("Äiá»ƒm TB mÃ´n: " + String.format("%.2f", avg));
+        Student s = studentComboBox.getValue();
+        Subject sb = subjectComboBox.getValue();
+        if (s != null && sb != null) {
+            double avg = gradeDAO.getWeightedAverageBySubject(s.getStudentId(), sb.getSubjectId());
+            avgLabel.setText("Äiá»ƒm TB: " + String.format("%.2f", avg));
         }
     }
 
     @FXML
     private void handleCalculateGPA() {
-        Integer studentId = studentComboBox.getValue();
-        if (studentId != null) {
-            double gpa = gradeDAO.getOverallAverage(studentId);
+        Student s = studentComboBox.getValue();
+        if (s != null) {
+            double gpa = gradeDAO.getOverallAverage(s.getStudentId());
             gpaLabel.setText("GPA: " + String.format("%.2f", gpa));
         }
+    }
+    
+    private void showAlert(String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText(content);
+        alert.show();
     }
 }
 
@@ -795,6 +851,8 @@ import javafx.scene.Parent;
 import javafx.fxml.FXMLLoader;
 import java.io.IOException;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
 
 public class TeacherDashboardController {
 
@@ -805,23 +863,31 @@ public class TeacherDashboardController {
 
     @FXML
     private void handleGradeManagement() {
-        // Má»Ÿ mÃ n hÃ¬nh nháº­p/xem Ä‘iá»ƒm
         loadView("/grademanager/view/GradeManagementView.fxml");
     }
 
     @FXML
     private void handleLogout() {
-        // Quay láº¡i mÃ n hÃ¬nh Ä‘Äƒng nháº­p
-        loadView("/grademanager/view/LoginScreen.fxml");
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/grademanager/view/LoginScreen.fxml"));
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            stage.setScene(scene);
+            stage.centerOnScreen();
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     private void loadView(String fxmlPath) {
         try {
             Parent view = FXMLLoader.load(getClass().getResource(fxmlPath));
+            // --- FIX: ANCHOR (STRETCH TO FIT) ---
+            AnchorPane.setTopAnchor(view, 0.0);
+            AnchorPane.setBottomAnchor(view, 0.0);
+            AnchorPane.setLeftAnchor(view, 0.0);
+            AnchorPane.setRightAnchor(view, 0.0);
+            // ------------------------------------
             mainContentPane.getChildren().setAll(view);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 }
 
@@ -2331,7 +2397,7 @@ public class DatabaseConnector {
       </Label>
       <TextField fx:id="usernameField" promptText="TÃªn Ä‘Äƒng nháº­p" />
       <PasswordField fx:id="passwordField" promptText="Máº­t kháº©u" />
-      <Button fx:id="loginButton" mnemonicParsing="false" onAction="#handleLoginButtonAction" prefWidth="100.0" text="ÄÄƒng nháº­p" />
+      <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#handleLoginButtonAction" prefWidth="100.0" text="ÄÄƒng nháº­p" />
       <Label fx:id="errorLabel" textFill="RED" />
    </children>
    <padding>
@@ -2712,6 +2778,54 @@ public class Main extends Application {
 }
 
 ----------------------------------------------------------------
+// FILE: src\test\CleanDatabase.java
+----------------------------------------------------------------
+package test; // Or package grademanager; if you put it in the main folder
+
+import grademanager.util.DatabaseConnector;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.SQLException;
+
+public class CleanDatabase {
+    public static void main(String[] args) {
+        System.out.println("Dang don dep du lieu...");
+        
+        try (Connection conn = DatabaseConnector.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // 1. XÃ³a sáº¡ch dá»¯ liá»‡u (Theo thá»© tá»± Ä‘á»ƒ trÃ¡nh lá»—i khÃ³a ngoáº¡i)
+            stmt.executeUpdate("DELETE FROM Grades");
+            stmt.executeUpdate("DELETE FROM Assignments");
+            stmt.executeUpdate("DELETE FROM Students");
+            stmt.executeUpdate("DELETE FROM Classes");
+            stmt.executeUpdate("DELETE FROM Subjects");
+            stmt.executeUpdate("DELETE FROM Users"); // XÃ³a háº¿t user cÅ©
+
+            // 2. Reset bá»™ Ä‘áº¿m ID vá» 1 (Cho Ä‘áº¹p)
+            stmt.executeUpdate("DELETE FROM sqlite_sequence");
+
+            // 3. QUAN TRá»ŒNG: Táº¡o láº¡i tÃ i khoáº£n Admin máº·c Ä‘á»‹nh
+            // Äá»ƒ tháº§y cÃ´ giÃ¡o cÃ³ thá»ƒ Ä‘Äƒng nháº­p Ä‘Æ°á»£c láº§n Ä‘áº§u tiÃªn
+            String createAdmin = "INSERT INTO Users(username, password, full_name, role) " +
+                                 "VALUES ('admin', '123', 'System Administrator', 'ADMIN')";
+            stmt.executeUpdate(createAdmin);
+
+            System.out.println("=========================================");
+            System.out.println("THANH CONG! Database da sach se.");
+            System.out.println("Tai khoan mac dinh:");
+            System.out.println("User: admin");
+            System.out.println("Pass: 123");
+            System.out.println("=========================================");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Co loi xay ra: " + e.getMessage());
+        }
+    }
+}
+
+----------------------------------------------------------------
 // FILE: src\test\DatabaseResetTest.java
 ----------------------------------------------------------------
 package test;
@@ -2812,24 +2926,15 @@ package test;
 
 import grademanager.dao.GradeDAO;
 import grademanager.model.Grade;
+import java.util.List;
+import java.util.ArrayList;
 
 public class TestGradeDAO {
     public static void main(String[] args) {
         GradeDAO dao = new GradeDAO();
 
         // 1. ThÃªm má»›i Grade
-        Grade g1 = new Grade(0, 1, 1, "midterm", 7.5);
-        boolean inserted = dao.insert(g1);
-        System.out.println("Insert: " + inserted);
-
-        Grade g2 = new Grade(0, 1, 1, "final", 9.0);
-        boolean inserted2 = dao.insert(g2);
-        System.out.println("Insert: " + inserted2);
-
-        Grade g3 = new Grade(0, 1, 1, "assignment", 8.0);
-        boolean inserted3 = dao.insert(g3);
-        System.out.println("Insert: " + inserted3);
-        
+        String[] type = {"midtern", "final", "assignment"};
     }
 }
 
